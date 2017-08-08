@@ -30,6 +30,7 @@ public:
     , uint32_t maxOpenFiles
     , uint32_t blockRestartInterval
     , uint32_t maxFileSize
+    , leveldb::Env* env
   );
 
   virtual ~OpenWorker ();
