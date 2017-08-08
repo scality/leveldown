@@ -17,6 +17,9 @@
 #include "iterator.h"
 #include "common.h"
 
+#include <leveldb/env.h>
+#include <iostream>
+
 namespace leveldown {
 
 static Nan::Persistent<v8::FunctionTemplate> database_constructor;
@@ -193,9 +196,18 @@ NAN_METHOD(Database::Open) {
     , "blockRestartInterval"
     , 16
   );
+  uint64_t env_uint64_val = UInt64OptionValue(optionsObj, "env", 0);
 
   database->blockCache = leveldb::NewLRUCache(cacheSize);
   database->filterPolicy = leveldb::NewBloomFilterPolicy(10);
+
+  leveldb::Env *env = reinterpret_cast<leveldb::Env*>(reinterpret_cast<uintptr_t>(env_uint64_val));
+  if (env == NULL) {
+      env = leveldb::Env::Default();
+      std::cout << "Defaulting to default env" << std::endl;
+  } else {
+      std::cout << "Found env: " << env << std::endl;
+  }
 
   OpenWorker* worker = new OpenWorker(
       database
@@ -209,6 +221,7 @@ NAN_METHOD(Database::Open) {
     , blockSize
     , maxOpenFiles
     , blockRestartInterval
+    , env
   );
   // persist to prevent accidental GC
   v8::Local<v8::Object> _this = info.This();

@@ -18,6 +18,8 @@
 #include "leveldown.h"
 #include "iterator.h"
 
+#include <leveldb/env.h>
+
 namespace leveldown {
 
 NAN_METHOD(LevelDOWN);
