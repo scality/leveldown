@@ -40,7 +40,6 @@ Tested & supported platforms
   * <a href="#leveldown_del"><code><b>leveldown#del()</b></code></a>
   * <a href="#leveldown_batch"><code><b>leveldown#batch()</b></code></a>
   * <a href="#leveldown_approximateSize"><code><b>leveldown#approximateSize()</b></code></a>
-  * <a href="#leveldown_compactRange"><code><b>leveldown#compactRange()</b></code></a>
   * <a href="#leveldown_getProperty"><code><b>leveldown#getProperty()</b></code></a>
   * <a href="#leveldown_iterator"><code><b>leveldown#iterator()</b></code></a>
   * <a href="#iterator_next"><code><b>iterator#next()</b></code></a>
@@ -85,13 +84,10 @@ The following options are for advanced performance tuning. Modify them only if y
 
 * `'blockSize'` *(number, default `4096` = 4K)*: The *approximate* size of the blocks that make up the table files. The size related to uncompressed data (hence "approximate"). Blocks are indexed in the table file and entry-lookups involve reading an entire block and parsing to discover the required entry.
 
-* `'maxOpenFiles'` *(number, default: `1000`)*: The maximum number of files that LevelDB is allowed to have open at a time. If your data store is likely to have a large working set, you may increase this value to prevent file descriptor churn. To calculate the number of files required for your working set, divide your total data by `'maxFileSize'`. 
+* `'maxOpenFiles'` *(number, default: `1000`)*: The maximum number of files that LevelDB is allowed to have open at a time. If your data store is likely to have a large working set, you may increase this value to prevent file descriptor churn. To calculate the number of files required for your working set, divide your total data by 2MB, as each table file is a maximum of 2MB. 
 
 * `'blockRestartInterval'` *(number, default: `16`)*: The number of entries before restarting the "delta encoding" of keys within blocks. Each "restart" point stores the full key for the entry, between restarts, the common prefix of the keys for those entries is omitted. Restarts are similar to the concept of keyframes in video encoding and are used to minimise the amount of space required to store keys. This is particularly helpful when using deep namespacing / prefixing in your keys.
 
-* `'maxFileSize'` *(number, default: `2* 1024 * 1024` = 2MB)*: The maximum amount of bytes to write to a file before switching to a new one. From the LevelDB documentation:
-
-> ... if your filesystem is more efficient with larger files, you could consider increasing the value. The downside will be longer compactions and hence longer latency/performance hiccups. Another reason to increase this parameter might be when you are initially populating a large database.
 
 --------------------------------------------------------
 <a name="leveldown_close"></a>
@@ -169,16 +165,6 @@ The `callback` function will be called with no arguments if the operation is suc
 <a name="leveldown_approximateSize"></a>
 ### leveldown#approximateSize(start, end, callback)
 <code>approximateSize()</code> is an instance method on an existing database object. Used to get the approximate number of bytes of file system space used by the range `[start..end)`. The result may not include recently written data.
-
-The `start` and `end` parameters may be either `String` or Node.js `Buffer` objects representing keys in the LevelDB store.
-
-The `callback` function will be called with no arguments if the operation is successful or with a single `error` argument if the operation failed for any reason.
-
-
---------------------------------------------------------
-<a name="leveldown_compactRange"></a>
-### leveldown#compactRange(start, end, callback)
-<code>compactRange()</code> is an instance method on an existing database object. Used to manually trigger a database compaction in the range `[start..end)`.
 
 The `start` and `end` parameters may be either `String` or Node.js `Buffer` objects representing keys in the LevelDB store.
 
@@ -326,17 +312,25 @@ A large portion of the Windows support comes from code by [Krzysztof Kowalczyk](
 Prebuilt binaries
 -----------------
 
-LevelDOWN uses `prebuild` and `prebuild-install` for handling prebuilt binaries. See [this list](https://github.com/Level/leveldown/releases) of supported prebuilt platform binaries. When installing LevelDOWN `prebuild-install` will install prebuilt binaries from GitHub if they exist and fallback to a compile step if they don't.
+LevelDOWN uses `prebuild` to support prebuilt binaries. See [this list](https://github.com/Level/leveldown/releases) of supported prebuilt platform binaries. When installing LevelDOWN `prebuild --download` will download prebuilt binaries from GitHub if they exist and fallback to a compile step if they don't.
 
-If you are working on LevelDOWN and want to re-compile the C++ code it's enough to do `npm install`.
+If you are working on LevelDOWN and want to compile the C++ code you can do:
 
-If you don't want to use the `prebuild` for the platform you are installing on, specify the `--build-from-source` flag when you install.
+```
+$ npm run rebuild [--debug] [--verbose]
+```
+
+or
+
+```
+$ npm i --build-from-source [--debug] [--verbose]
+```
 
 <a name="license"></a>
 License &amp; copyright
 -------------------
 
-Copyright &copy; 2012-2017 **LevelDOWN** [contributors](https://github.com/level/community#contributors).
+Copyright &copy; 2012-2016 **LevelDOWN** [contributors](https://github.com/level/community#contributors).
 
 **LevelDOWN** is licensed under the MIT license. All rights not explicitly granted in the MIT license are reserved. See the included `LICENSE.md` file for more details.
 

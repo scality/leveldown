@@ -1,7 +1,7 @@
 {
   "name": "leveldown",
   "description": "A Node.js LevelDB binding, primary backend for LevelUP",
-  "version": "1.7.2",
+  "version": "1.5.3",
   "contributors": [
     "Rod Vagg <r@va.gg> (https://github.com/rvagg)",
     "John Chesley <john@chesl.es> (https://github.com/chesles/)",
@@ -15,9 +15,7 @@
     "Anton Whalley <anton.whalley@nearform.com> (https://github.com/No9)",
     "Matteo Collina <matteo.collina@gmail.com> (https://github.com/mcollina)",
     "Pedro Teixeira <pedro.teixeira@gmail.com> (https://github.com/pgte)",
-    "James Halliday <mail@substack.net> (https://github.com/substack)",
-    "Gordon Hall <gordonh@member.fsf.org> (https://github.com/bookchin)",
-    "Yichao 'Peak' Ji <peakji@gmail.com> (https://github.com/peakji)"
+    "James Halliday <mail@substack.net> (https://github.com/substack)"
   ],
   "repository": {
     "type": "git",
@@ -33,8 +31,8 @@
     "abstract-leveldown": "~2.6.1",
     "bindings": "~1.2.1",
     "fast-future": "~1.0.2",
-    "nan": "~2.6.1",
-    "prebuild-install": "^2.1.0"
+    "nan": "~2.4.0",
+    "prebuild": "^5.0.2"
   },
   "devDependencies": {
     "async": "^2.0.1",
@@ -47,15 +45,14 @@
     "monotonic-timestamp": "~0.0.8",
     "node-uuid": "~1.4.3",
     "optimist": "~0.6.1",
-    "prebuild": "^6.0.2",
-    "prebuild-ci": "^2.0.0",
+    "prebuild-ci": "^1.0.9",
     "readfiletree": "~0.0.1",
-    "rimraf": "^2.6.1",
+    "rimraf": "~2.5.0",
     "slump": "~2.0.0",
     "tape": "^4.5.1"
   },
   "scripts": {
-    "install": "prebuild-install || node-gyp rebuild",
+    "install": "prebuild --install",
     "test": "(tape test/*-test.js | faucet) && prebuild-ci",
     "rebuild": "prebuild --compile",
     "prebuild": "prebuild --all --strip --verbose"

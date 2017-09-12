@@ -1,4 +1,4 @@
-/* Copyright (c) 2012-2017 LevelDOWN contributors
+/* Copyright (c) 2012-2016 LevelDOWN contributors
  * See list at <https://github.com/level/leveldown#contributing>
  * MIT License <https://github.com/level/leveldown/blob/master/LICENSE.md>
  */
@@ -214,13 +214,13 @@ bool Iterator::IteratorNext (std::vector<std::pair<std::string, std::string> >& 
 
     if (ok) {
       result.push_back(std::make_pair(key, value));
+      size = size + key.size() + value.size();
 
       if (!landed) {
         landed = true;
         return true;
       }
 
-      size = size + key.size() + value.size();
       if (size > highWaterMark)
         return true;
 
@@ -328,10 +328,6 @@ NAN_METHOD(Iterator::Next) {
   }
 
   v8::Local<v8::Function> callback = info[0].As<v8::Function>();
-
-  if (iterator->ended) {
-    LD_RETURN_CALLBACK_OR_ERROR(callback, "iterator has ended");
-  }
 
   NextWorker* worker = new NextWorker(
       iterator

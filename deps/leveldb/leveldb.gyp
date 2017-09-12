@@ -1,7 +1,7 @@
 {'targets': [{
     'target_name': 'leveldb'
   , 'variables': {
-        'ldbversion': '1.20'
+        'ldbversion': '1.19'
     }
   , 'type': 'static_library'
 		# Overcomes an issue with the linker and thin .a files on SmartOS
@@ -100,21 +100,6 @@
                 '-Wno-sign-compare'
             ]
         }]
-      , ['OS == "openbsd"', {
-            'defines': [
-                'OS_OPENBSD=1'
-              , '_REENTRANT=1'
-            ]
-          , 'libraries': [
-                '-lpthread'
-            ]
-          , 'ccflags': [
-                '-pthread'
-            ]
-          , 'cflags': [
-                '-Wno-sign-compare'
-            ]
-        }]
       , ['OS == "solaris"', {
             'defines': [
                 'OS_SOLARIS=1'
@@ -188,7 +173,6 @@
       , 'leveldb-<(ldbversion)/include/leveldb/table_builder.h'
       , 'leveldb-<(ldbversion)/include/leveldb/write_batch.h'
       , 'leveldb-<(ldbversion)/port/port.h'
-      , 'leveldb-<(ldbversion)/port/port_posix_sse.cc'
       , 'leveldb-<(ldbversion)/table/block.cc'
       , 'leveldb-<(ldbversion)/table/block.h'
       , 'leveldb-<(ldbversion)/table/block_builder.cc'
