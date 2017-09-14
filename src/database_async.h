@@ -29,11 +29,7 @@ public:
     , uint32_t blockSize
     , uint32_t maxOpenFiles
     , uint32_t blockRestartInterval
-<<<<<<< 898b5d551f778da4e841769dcc252230b6fc8e38
-=======
-    , uint32_t maxFileSize
     , leveldb::Env* env
->>>>>>> Allow to pass an Env* to the OpenWorker function
   );
 
   virtual ~OpenWorker ();

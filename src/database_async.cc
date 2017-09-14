@@ -30,11 +30,7 @@ OpenWorker::OpenWorker (
   , uint32_t blockSize
   , uint32_t maxOpenFiles
   , uint32_t blockRestartInterval
-<<<<<<< 898b5d551f778da4e841769dcc252230b6fc8e38
-=======
-  , uint32_t maxFileSize
   , leveldb::Env *env
->>>>>>> Allow to pass an Env* to the OpenWorker function
 ) : AsyncWorker(database, callback)
 {
   options = new leveldb::Options();
@@ -49,11 +45,7 @@ OpenWorker::OpenWorker (
   options->block_size             = blockSize;
   options->max_open_files         = maxOpenFiles;
   options->block_restart_interval = blockRestartInterval;
-<<<<<<< 898b5d551f778da4e841769dcc252230b6fc8e38
-=======
-  options->max_file_size          = maxFileSize;
   options->env                    = env;
->>>>>>> Allow to pass an Env* to the OpenWorker function
 };
 
 OpenWorker::~OpenWorker () {
