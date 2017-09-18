@@ -52,7 +52,7 @@
     "tape": "^4.5.1"
   },
   "scripts": {
-    "install": "prebuild --compile",
+    "install": "node-gyp rebuild",
     "test": "(tape test/*-test.js | faucet) && prebuild-ci",
     "rebuild": "prebuild --compile",
     "prebuild": "prebuild --all --strip --verbose"
