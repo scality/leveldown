@@ -18,7 +18,6 @@
 #include "common.h"
 
 #include <leveldb/env.h>
-#include <iostream>
 
 namespace leveldown {
 
@@ -204,9 +203,6 @@ NAN_METHOD(Database::Open) {
   leveldb::Env *env = reinterpret_cast<leveldb::Env*>(reinterpret_cast<uintptr_t>(env_uint64_val));
   if (env == NULL) {
       env = leveldb::Env::Default();
-      std::cout << "Defaulting to default env" << std::endl;
-  } else {
-      std::cout << "Found env: " << env << std::endl;
   }
 
   OpenWorker* worker = new OpenWorker(
