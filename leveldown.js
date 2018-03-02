@@ -70,6 +70,10 @@ LevelDOWN.prototype._iterator = function (options) {
   return new Iterator(this, options)
 }
 
+LevelDOWN.prototype.compactRange = function (start, end, callback) {
+  return this.binding.compactRange(start, end, callback)
+}
+
 
 LevelDOWN.destroy = function (location, env, callback) {
   if (arguments.length < 2)
