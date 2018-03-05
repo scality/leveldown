@@ -10,6 +10,7 @@
 #include <vector>
 #include <node.h>
 
+#include <leveldb/env.h>
 #include <leveldb/cache.h>
 #include <leveldb/db.h>
 #include <leveldb/filter_policy.h>

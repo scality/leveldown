@@ -33,6 +33,18 @@ NAN_INLINE uint32_t UInt32OptionValue(v8::Local<v8::Object> options,
     : def;
 }
 
+NAN_INLINE uint64_t UInt64OptionValue(v8::Local<v8::Object> options,
+                                      const char* _key,
+                                      uint64_t def) {
+  Nan::HandleScope scope;
+  v8::Local<v8::String> key = Nan::New(_key).ToLocalChecked();
+  return !options.IsEmpty()
+    && options->Has(key)
+    && options->Get(key)->IsNumber()
+    ? options->Get(key)->IntegerValue()
+    : def;
+}
+
 } // namespace leveldown
 
 #endif
