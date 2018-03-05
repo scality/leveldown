@@ -14,13 +14,16 @@ namespace leveldown {
 
 class DestroyWorker : public AsyncWorker {
 public:
-  DestroyWorker(Nan::Utf8String* location, Nan::Callback *callback);
+  DestroyWorker(Nan::Utf8String* location,
+                Nan::Callback *callback,
+                leveldb::Env *env);
 
   virtual ~DestroyWorker();
   virtual void Execute();
 
 private:
-  Nan::Utf8String* location;
+  Nan::Utf8String*  location;
+  leveldb::Options* options;
 };
 
 class RepairWorker : public AsyncWorker {

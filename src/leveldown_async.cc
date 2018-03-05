@@ -12,9 +12,14 @@ namespace leveldown {
 
 /** DESTROY WORKER **/
 
-DestroyWorker::DestroyWorker(Nan::Utf8String* location, Nan::Callback *callback)
+DestroyWorker::DestroyWorker(Nan::Utf8String* location,
+                             Nan::Callback *callback,
+                             leveldb::Env *env)
   : AsyncWorker(NULL, callback, "leveldown:destroy"), location(location)
-{}
+{
+    this->options = new leveldb::Options();
+    this->options->env = env;
+}
 
 DestroyWorker::~DestroyWorker() {
   delete location;
@@ -22,7 +27,7 @@ DestroyWorker::~DestroyWorker() {
 
 void DestroyWorker::Execute() {
   leveldb::Options options;
-  SetStatus(leveldb::DestroyDB(**location, options));
+  SetStatus(leveldb::DestroyDB(**location, *(this->options)));
 }
 
 /** REPAIR WORKER **/

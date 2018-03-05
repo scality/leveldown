@@ -77,7 +77,7 @@ LevelDOWN.prototype._iterator = function (options) {
   return new Iterator(this, options)
 }
 
-LevelDOWN.destroy = function (location, callback) {
+LevelDOWN.destroy = function (location, env, callback) {
   if (arguments.length < 2) {
     throw new Error('destroy() requires `location` and `callback` arguments')
   }
@@ -88,10 +88,10 @@ LevelDOWN.destroy = function (location, callback) {
     throw new Error('destroy() requires a callback function argument')
   }
 
-  binding.destroy(location, callback)
+  binding.destroy(location, env, callback)
 }
 
-LevelDOWN.repair = function (location, callback) {
+LevelDOWN.repair = function (location, env, callback) {
   if (arguments.length < 2) {
     throw new Error('repair() requires `location` and `callback` arguments')
   }
@@ -102,7 +102,7 @@ LevelDOWN.repair = function (location, callback) {
     throw new Error('repair() requires a callback function argument')
   }
 
-  binding.repair(location, callback)
+  binding.repair(location, env, callback)
 }
 
 module.exports = LevelDOWN.default = LevelDOWN
