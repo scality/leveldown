@@ -3,6 +3,7 @@
  * MIT License <https://github.com/level/leveldown/blob/master/LICENSE.md>
  */
 
+#include <iostream>
 #include <node.h>
 #include <node_buffer.h>
 
@@ -25,6 +26,7 @@ Database::Database (const v8::Local<v8::Value>& from)
   : location(new Nan::Utf8String(from))
   , db(NULL)
   , currentIteratorId(0)
+  , currentOperations(0)
   , pendingCloseWorker(NULL)
   , blockCache(NULL)
   , filterPolicy(NULL) {};
@@ -48,7 +50,14 @@ leveldb::Status Database::PutToDatabase (
       , leveldb::Slice key
       , leveldb::Slice value
     ) {
-  return db->Put(*options, key, value);
+  std::cout << "Database::PutToDatabase()" << std::endl;
+  if (!this->db) {
+      return leveldb::Status::IOError("Database closed");
+  }
+  // if (this->db == NULL) {
+  //   return leveldb::Status::IOError("Database closed");
+  // }
+  return this->db->Put(*options, key, value);
 }
 
 leveldb::Status Database::GetFromDatabase (
@@ -56,39 +65,54 @@ leveldb::Status Database::GetFromDatabase (
       , leveldb::Slice key
       , std::string& value
     ) {
-  return db->Get(*options, key, &value);
+  // if (this->db == NULL) {
+  //   return leveldb::Status::IOError("Database closed");
+  // }
+  return this->db->Get(*options, key, &value);
 }
 
 leveldb::Status Database::DeleteFromDatabase (
         leveldb::WriteOptions* options
       , leveldb::Slice key
     ) {
-  return db->Delete(*options, key);
+  // if (this->db == NULL) {
+  //   return leveldb::Status::IOError("Database closed");
+  // }
+  return this->db->Delete(*options, key);
 }
 
 leveldb::Status Database::WriteBatchToDatabase (
         leveldb::WriteOptions* options
       , leveldb::WriteBatch* batch
     ) {
-  return db->Write(*options, batch);
+  // if (this->db == NULL) {
+  //   return leveldb::Status::IOError("Database closed");
+  // }
+  return this->db->Write(*options, batch);
 }
 
 uint64_t Database::ApproximateSizeFromDatabase (const leveldb::Range* range) {
   uint64_t size;
-  db->GetApproximateSizes(range, 1, &size);
+  // if (this->db == NULL) {
+  //   return leveldb::Status::IOError("Database closed");
+  // }
+  this->db->GetApproximateSizes(range, 1, &size);
   return size;
 }
 
-void Database::CompactRangeFromDatabase (const leveldb::Slice* start, 
+void Database::CompactRangeFromDatabase (const leveldb::Slice* start,
                                          const leveldb::Slice* end) {
-  db->CompactRange(start, end);
+  // if (this->db != NULL) {
+    this->db->CompactRange(start, end);
+  // }
 }
 
 void Database::GetPropertyFromDatabase (
       const leveldb::Slice& property
     , std::string* value) {
-
-  db->GetProperty(property, value);
+  // if (this->db != NULL) {
+    db->GetProperty(property, value);
+// }
 }
 
 leveldb::Iterator* Database::NewIterator (leveldb::ReadOptions* options) {
@@ -110,13 +134,19 @@ void Database::ReleaseIterator (uint32_t id) {
   // if there is a pending CloseWorker it means that we're waiting for
   // iterators to end before we can close them
   iterators.erase(id);
-  if (iterators.empty() && pendingCloseWorker != NULL) {
-    Nan::AsyncQueueWorker((AsyncWorker*)pendingCloseWorker);
-    pendingCloseWorker = NULL;
-  }
+  this->CloseIfPending();
+}
+
+void Database::CloseIfPending(void) {
+    std::cout << "Check pending close worker: " << this->pendingCloseWorker << std::endl;
+    if (this->CanClose() && this->pendingCloseWorker != NULL) {
+        Nan::AsyncQueueWorker((AsyncWorker*)this->pendingCloseWorker);
+        this->pendingCloseWorker = NULL;
+    }
 }
 
 void Database::CloseDatabase () {
+  std::cout << "Database::CloseDatabase()" << std::endl;
   delete db;
   db = NULL;
   if (blockCache) {
@@ -239,7 +269,10 @@ NAN_METHOD(Database::Close) {
   v8::Local<v8::Object> _this = info.This();
   worker->SaveToPersistent("database", _this);
 
+  std::cout << "inside Database::Close wrapper" << std::endl;
+
   if (!database->iterators.empty()) {
+      std::cout << "Database::Close: No empty iterators" << std::endl;
     // yikes, we still have iterators open! naughty naughty.
     // we have to queue up a CloseWorker and manually close each of them.
     // the CloseWorker will be invoked once they are all cleaned up
@@ -274,7 +307,11 @@ NAN_METHOD(Database::Close) {
           );
         }
     }
+  } else if (!database->CanClose()) {
+      std::cout << "Database::Close: Pending close" << std::endl;
+      database->pendingCloseWorker = worker;
   } else {
+      std::cout << "Database::Close: Async queue worker" << std::endl;
     Nan::AsyncQueueWorker(worker);
   }
 }
@@ -302,6 +339,9 @@ NAN_METHOD(Database::Put) {
   // persist to prevent accidental GC
   v8::Local<v8::Object> _this = info.This();
   worker->SaveToPersistent("database", _this);
+
+  std::cout << "inside Database::Put wrapper" << std::endl;
+  database->increaseOperations();
   Nan::AsyncQueueWorker(worker);
 }
 
@@ -325,6 +365,7 @@ NAN_METHOD(Database::Get) {
   // persist to prevent accidental GC
   v8::Local<v8::Object> _this = info.This();
   worker->SaveToPersistent("database", _this);
+  database->increaseOperations();
   Nan::AsyncQueueWorker(worker);
 }
 
@@ -346,6 +387,7 @@ NAN_METHOD(Database::Delete) {
   // persist to prevent accidental GC
   v8::Local<v8::Object> _this = info.This();
   worker->SaveToPersistent("database", _this);
+  database->increaseOperations();
   Nan::AsyncQueueWorker(worker);
 }
 
@@ -409,6 +451,7 @@ NAN_METHOD(Database::Batch) {
     // persist to prevent accidental GC
     v8::Local<v8::Object> _this = info.This();
     worker->SaveToPersistent("database", _this);
+    database->increaseOperations();
     Nan::AsyncQueueWorker(worker);
   } else {
     LD_RUN_CALLBACK(callback, 0, NULL);
@@ -435,6 +478,7 @@ NAN_METHOD(Database::ApproximateSize) {
   // persist to prevent accidental GC
   v8::Local<v8::Object> _this = info.This();
   worker->SaveToPersistent("database", _this);
+  database->increaseOperations();
   Nan::AsyncQueueWorker(worker);
 }
 
@@ -457,6 +501,7 @@ NAN_METHOD(Database::CompactRange) {
   // persist to prevent accidental GC
   v8::Local<v8::Object> _this = info.This();
   worker->SaveToPersistent("database", _this);
+  database->increaseOperations();
   Nan::AsyncQueueWorker(worker);
 }
 

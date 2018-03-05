@@ -136,6 +136,7 @@ public:
 
   virtual ~BatchWorker ();
   virtual void Execute ();
+  virtual void WorkComplete (void);
 
 private:
   leveldb::WriteOptions* options;

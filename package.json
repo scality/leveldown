@@ -59,7 +59,7 @@
     "verify-travis-appveyor": "^2.0.0"
   },
   "scripts": {
-    "install": "prebuild-install || node-gyp rebuild",
+    "install": "node-gyp rebuild",
     "test": "verify-travis-appveyor && (tape test/*-test.js | faucet) && prebuild-ci",
     "rebuild": "prebuild --compile",
     "prebuild": "prebuild --all --strip --verbose"

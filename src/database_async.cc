@@ -5,7 +5,7 @@
 
 #include <node.h>
 #include <node_buffer.h>
-
+#include <iostream>
 #include <leveldb/write_batch.h>
 #include <leveldb/filter_policy.h>
 
@@ -67,10 +67,12 @@ CloseWorker::CloseWorker (
 CloseWorker::~CloseWorker () {}
 
 void CloseWorker::Execute () {
+  std::cout << "close worker execute" << std::endl;
   database->CloseDatabase();
 }
 
 void CloseWorker::WorkComplete () {
+  std::cout << "Close worker finished" << std::endl;
   Nan::HandleScope scope;
   HandleOKCallback();
   delete callback;
@@ -98,6 +100,7 @@ void IOWorker::WorkComplete () {
   Nan::HandleScope scope;
 
   DisposeStringOrBufferFromSlice(GetFromPersistent("key"), key);
+  database->decreaseOperations();
   AsyncWorker::WorkComplete();
 }
 
@@ -125,6 +128,7 @@ ReadWorker::~ReadWorker () {
 }
 
 void ReadWorker::Execute () {
+  std::cout << "read worker execute" << std::endl;
   SetStatus(database->GetFromDatabase(options, key, value));
 }
 
@@ -169,6 +173,7 @@ DeleteWorker::~DeleteWorker () {
 }
 
 void DeleteWorker::Execute () {
+  std::cout << "delete worker execute" << std::endl;
   SetStatus(database->DeleteFromDatabase(options, key));
 }
 
@@ -193,12 +198,13 @@ WriteWorker::WriteWorker (
 WriteWorker::~WriteWorker () { }
 
 void WriteWorker::Execute () {
+  std::cout << "Write worker execute" << std::endl;
   SetStatus(database->PutToDatabase(options, key, value));
 }
 
 void WriteWorker::WorkComplete () {
   Nan::HandleScope scope;
-
+  std::cout << "Write worker finished" << std::endl;
   DisposeStringOrBufferFromSlice(GetFromPersistent("value"), value);
   IOWorker::WorkComplete();
 }
@@ -224,6 +230,13 @@ BatchWorker::~BatchWorker () {
 
 void BatchWorker::Execute () {
   SetStatus(database->WriteBatchToDatabase(options, batch));
+}
+
+void BatchWorker::WorkComplete(void) {
+  Nan::HandleScope scope;
+
+  database->decreaseOperations();
+  AsyncWorker::WorkComplete();
 }
 
 /** APPROXIMATE SIZE WORKER **/
@@ -255,6 +268,7 @@ void ApproximateSizeWorker::WorkComplete() {
 
   DisposeStringOrBufferFromSlice(GetFromPersistent("start"), range.start);
   DisposeStringOrBufferFromSlice(GetFromPersistent("end"), range.limit);
+  database->decreaseOperations();
   AsyncWorker::WorkComplete();
 }
 
@@ -300,6 +314,7 @@ void CompactRangeWorker::WorkComplete() {
 
   DisposeStringOrBufferFromSlice(GetFromPersistent("compactStart"), rangeStart);
   DisposeStringOrBufferFromSlice(GetFromPersistent("compactEnd"), rangeEnd);
+  database->decreaseOperations();
   AsyncWorker::WorkComplete();
 }
 

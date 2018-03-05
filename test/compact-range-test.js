@@ -1,6 +1,7 @@
 const test       = require('tape')
     , testCommon = require('abstract-leveldown/testCommon')
     , leveldown  = require('..')
+    , make       = require('./make')
 
 var db
 
@@ -38,4 +39,19 @@ test('test compactRange() frees disk space after key deletion', function (t) {
 
 test('tearDown', function (t) {
   db.close(testCommon.tearDown.bind(null, t));
+});
+
+make('test compactRange(): closing db with pending compactRange', function (db, t, done) {
+    const key1 = '000000';
+    const key2 = '000001';
+    var hasCompactRange = false;
+    db.compactRange(key1, key2, err => {
+        t.error(err, 'no error from compactRange()');
+        hasCompactRange = true;
+    });
+    db.close(err => {
+        t.error(err, 'no error from close()');
+        t.same(hasCompactRange, true, 'compactRange done');
+        done();
+    });
 });

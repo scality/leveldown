@@ -76,6 +76,27 @@ public:
   void CloseDatabase ();
   void ReleaseIterator (uint32_t id);
 
+  void            CloseIfPending(void);
+
+  inline bool     CanClose(void) const {
+    return (this->iterators.empty() && this->currentOperations == 0);
+  }
+
+  inline uint32_t getCurrentOperations(void) const {
+    return this->currentOperations;
+  }
+
+  inline void     increaseOperations(void) {
+    ++this->currentOperations;
+  }
+
+  inline void     decreaseOperations(void) {
+    if (this->currentOperations > 0) {
+      --this->currentOperations;
+      this->CloseIfPending();
+    }
+  }
+
   Database (const v8::Local<v8::Value>& from);
   ~Database ();
 
@@ -83,6 +104,7 @@ private:
   Nan::Utf8String* location;
   leveldb::DB* db;
   uint32_t currentIteratorId;
+  uint32_t currentOperations;
   void(*pendingCloseWorker);
   leveldb::Cache* blockCache;
   const leveldb::FilterPolicy* filterPolicy;
