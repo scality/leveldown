@@ -18,12 +18,21 @@ NAN_METHOD(DestroyDB) {
 
   Nan::Utf8String* location = new Nan::Utf8String(info[0]);
 
+  uint64_t tmp = info[1]->IntegerValue();
+
+  leveldb::Env *env = reinterpret_cast<leveldb::Env*>(tmp);
+
+  if (env == NULL) {
+      env = leveldb::Env::Default();
+  }
+
   Nan::Callback* callback = new Nan::Callback(
-      v8::Local<v8::Function>::Cast(info[1]));
+      v8::Local<v8::Function>::Cast(info[2]));
 
   DestroyWorker* worker = new DestroyWorker(
       location
     , callback
+    , env
   );
 
   Nan::AsyncQueueWorker(worker);
