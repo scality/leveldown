@@ -18,7 +18,7 @@ NAN_METHOD(DestroyDB) {
 
   Nan::Utf8String* location = new Nan::Utf8String(info[0]);
 
-  uint64_t tmp = info[1]->IntegerValue();
+  uint64_t tmp = info[1]->IntegerValue(Nan::GetCurrentContext()).ToChecked();
 
   leveldb::Env *env = reinterpret_cast<leveldb::Env*>(tmp);
 
@@ -64,19 +64,21 @@ void Init (v8::Local<v8::Object> target) {
   leveldown::Batch::Init();
 
   v8::Local<v8::Function> leveldown =
-      Nan::New<v8::FunctionTemplate>(LevelDOWN)->GetFunction();
+    Nan::New<v8::FunctionTemplate>(LevelDOWN)->GetFunction(Nan::GetCurrentContext()).ToLocalChecked();
 
   leveldown->Set(
-      Nan::New("destroy").ToLocalChecked()
-    , Nan::New<v8::FunctionTemplate>(DestroyDB)->GetFunction()
+      Nan::GetCurrentContext()
+    , Nan::New("destroy").ToLocalChecked()
+    , Nan::New<v8::FunctionTemplate>(DestroyDB)->GetFunction(Nan::GetCurrentContext()).ToLocalChecked()
   );
 
   leveldown->Set(
-      Nan::New("repair").ToLocalChecked()
-    , Nan::New<v8::FunctionTemplate>(RepairDB)->GetFunction()
+      Nan::GetCurrentContext()
+    , Nan::New("repair").ToLocalChecked()
+    , Nan::New<v8::FunctionTemplate>(RepairDB)->GetFunction(Nan::GetCurrentContext()).ToLocalChecked()
   );
 
-  target->Set(Nan::New("leveldown").ToLocalChecked(), leveldown);
+  target->Set(Nan::GetCurrentContext(), Nan::New("leveldown").ToLocalChecked(), leveldown);
 }
 
 NODE_MODULE(leveldown, Init)

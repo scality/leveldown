@@ -16,8 +16,8 @@ NAN_INLINE bool BooleanOptionValue(v8::Local<v8::Object> options,
   Nan::HandleScope scope;
   v8::Local<v8::String> key = Nan::New(_key).ToLocalChecked();
   return !options.IsEmpty()
-    && options->Has(key)
-    ? options->Get(key)->BooleanValue()
+    && options->Has(Nan::GetCurrentContext(), key).ToChecked()
+    ? options->Get(Nan::GetCurrentContext(), key).ToLocalChecked()->BooleanValue(v8::Isolate::GetCurrent())
     : def;
 }
 
@@ -27,9 +27,9 @@ NAN_INLINE uint32_t UInt32OptionValue(v8::Local<v8::Object> options,
   Nan::HandleScope scope;
   v8::Local<v8::String> key = Nan::New(_key).ToLocalChecked();
   return !options.IsEmpty()
-    && options->Has(key)
-    && options->Get(key)->IsNumber()
-    ? options->Get(key)->Uint32Value()
+    && options->Has(Nan::GetCurrentContext(), key).ToChecked()
+    && options->Get(Nan::GetCurrentContext(), key).ToLocalChecked()->IsNumber()
+    ? options->Get(Nan::GetCurrentContext(), key).ToLocalChecked()->Uint32Value(Nan::GetCurrentContext()).ToChecked()
     : def;
 }
 
@@ -39,9 +39,9 @@ NAN_INLINE uint64_t UInt64OptionValue(v8::Local<v8::Object> options,
   Nan::HandleScope scope;
   v8::Local<v8::String> key = Nan::New(_key).ToLocalChecked();
   return !options.IsEmpty()
-    && options->Has(key)
-    && options->Get(key)->IsNumber()
-    ? options->Get(key)->IntegerValue()
+    && options->Has(Nan::GetCurrentContext(), key).ToChecked()
+    && options->Get(Nan::GetCurrentContext(), key).ToLocalChecked()->IsNumber()
+    ? options->Get(Nan::GetCurrentContext(), key).ToLocalChecked()->IntegerValue(Nan::GetCurrentContext()).ToChecked()
     : def;
 }
 

@@ -39,7 +39,7 @@ void Batch::Init () {
 }
 
 NAN_METHOD(Batch::New) {
-  Database* database = Nan::ObjectWrap::Unwrap<Database>(info[0]->ToObject());
+  Database* database = Nan::ObjectWrap::Unwrap<Database>(info[0]->ToObject(Nan::GetCurrentContext()).ToLocalChecked());
   v8::Local<v8::Object> optionsObj;
 
   if (info.Length() > 1 && info[1]->IsObject()) {
@@ -69,10 +69,10 @@ v8::Local<v8::Value> Batch::NewInstance (
 
   if (optionsObj.IsEmpty()) {
     v8::Local<v8::Value> argv[1] = { database };
-    maybeInstance = Nan::NewInstance(constructorHandle->GetFunction(), 1, argv);
+    maybeInstance = Nan::NewInstance(constructorHandle->GetFunction(Nan::GetCurrentContext()).ToLocalChecked(), 1, argv);
   } else {
     v8::Local<v8::Value> argv[2] = { database, optionsObj };
-    maybeInstance = Nan::NewInstance(constructorHandle->GetFunction(), 2, argv);
+    maybeInstance = Nan::NewInstance(constructorHandle->GetFunction(Nan::GetCurrentContext()).ToLocalChecked(), 2, argv);
   }
 
   if (maybeInstance.IsEmpty())

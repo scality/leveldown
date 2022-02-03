@@ -29,7 +29,7 @@ struct Reference {
 
   Reference(v8::Local<v8::Value> obj, leveldb::Slice slice) : slice(slice) {
     v8::Local<v8::Object> _obj = Nan::New<v8::Object>();
-    _obj->Set(Nan::New("obj").ToLocalChecked(), obj);
+    _obj->Set(Nan::GetCurrentContext(), Nan::New("obj").ToLocalChecked(), obj);
     handle.Reset(_obj);
   };
 };
