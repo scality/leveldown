@@ -171,7 +171,7 @@ v8::Local<v8::Value> Database::NewInstance (v8::Local<v8::String> &location) {
       Nan::New<v8::FunctionTemplate>(database_constructor);
 
   v8::Local<v8::Value> argv[] = { location };
-  maybeInstance = Nan::NewInstance(constructorHandle->GetFunction(), 1, argv);
+  maybeInstance = Nan::NewInstance(constructorHandle->GetFunction(Nan::GetCurrentContext()).ToLocalChecked(), 1, argv);
 
   if (maybeInstance.IsEmpty())
       Nan::ThrowError("Could not create new Database instance");
@@ -270,9 +270,10 @@ NAN_METHOD(Database::Close) {
         if (!iterator->ended) {
           v8::Local<v8::Function> end =
               v8::Local<v8::Function>::Cast(iterator->handle()->Get(
-                  Nan::New<v8::String>("end").ToLocalChecked()));
+                  Nan::GetCurrentContext(),
+                  Nan::New<v8::String>("end").ToLocalChecked()).ToLocalChecked());
           v8::Local<v8::Value> argv[] = {
-              Nan::New<v8::FunctionTemplate>(EmptyMethod)->GetFunction() // empty callback
+              Nan::New<v8::FunctionTemplate>(EmptyMethod)->GetFunction(Nan::GetCurrentContext()).ToLocalChecked() // empty callback
           };
           Nan::MakeCallback(
               iterator->handle()
@@ -377,12 +378,12 @@ NAN_METHOD(Database::Batch) {
   bool hasData = false;
 
   for (unsigned int i = 0; i < array->Length(); i++) {
-    if (!array->Get(i)->IsObject())
+    if (!array->Get(Nan::GetCurrentContext(), i).ToLocalChecked()->IsObject())
       continue;
 
-    v8::Local<v8::Object> obj = v8::Local<v8::Object>::Cast(array->Get(i));
-    v8::Local<v8::Value> keyBuffer = obj->Get(Nan::New("key").ToLocalChecked());
-    v8::Local<v8::Value> type = obj->Get(Nan::New("type").ToLocalChecked());
+    v8::Local<v8::Object> obj = v8::Local<v8::Object>::Cast(array->Get(Nan::GetCurrentContext(), i).ToLocalChecked());
+    v8::Local<v8::Value> keyBuffer = obj->Get(Nan::GetCurrentContext(), Nan::New("key").ToLocalChecked()).ToLocalChecked();
+    v8::Local<v8::Value> type = obj->Get(Nan::GetCurrentContext(), Nan::New("type").ToLocalChecked()).ToLocalChecked();
 
     if (type->StrictEquals(Nan::New("del").ToLocalChecked())) {
       LD_STRING_OR_BUFFER_TO_SLICE(key, keyBuffer, key)
@@ -393,7 +394,7 @@ NAN_METHOD(Database::Batch) {
 
       DisposeStringOrBufferFromSlice(keyBuffer, key);
     } else if (type->StrictEquals(Nan::New("put").ToLocalChecked())) {
-      v8::Local<v8::Value> valueBuffer = obj->Get(Nan::New("value").ToLocalChecked());
+      v8::Local<v8::Value> valueBuffer = obj->Get(Nan::GetCurrentContext(), Nan::New("value").ToLocalChecked()).ToLocalChecked();
 
       LD_STRING_OR_BUFFER_TO_SLICE(key, keyBuffer, key)
       LD_STRING_OR_BUFFER_TO_SLICE(value, valueBuffer, value)

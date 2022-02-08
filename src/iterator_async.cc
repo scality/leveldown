@@ -61,8 +61,8 @@ void NextWorker::HandleOKCallback () {
     }
 
     // put the key & value in a descending order, so that they can be .pop:ed in javascript-land
-    returnArray->Set(Nan::New<v8::Integer>(static_cast<int>(arraySize - idx * 2 - 1)), returnKey);
-    returnArray->Set(Nan::New<v8::Integer>(static_cast<int>(arraySize - idx * 2 - 2)), returnValue);
+    returnArray->Set(Nan::GetCurrentContext(), Nan::New<v8::Integer>(static_cast<int>(arraySize - idx * 2 - 1)), returnKey);
+    returnArray->Set(Nan::GetCurrentContext(), Nan::New<v8::Integer>(static_cast<int>(arraySize - idx * 2 - 2)), returnValue);
   }
 
   // clean up & handle the next/end state see iterator.cc/checkEndCallback
